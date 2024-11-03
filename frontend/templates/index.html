@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>THERMOMETER</title>
+    <script src="static/echarts.min.js"></script>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+
+<body>
+    <h2>THERMOMETER</h2>
+    <a href="/data">下载 JSON 数据</a>
+    <div id="main"></div>
+    <script type="text/javascript">
+        // 初始化 ECharts 实例
+        var myChart = echarts.init(document.getElementById('main'));
+
+        // 设置 ECharts 配置
+        var option = {
+            title: {
+                text: ''
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['Temperature (°C)', 'Humidity (%)']
+            },
+            xAxis: {
+                type: 'category',
+                data: [] // 初始为空，将从外部数据源填充
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value}'
+                }
+            },
+            series: [
+                {
+                    name: 'Temperature (°C)',
+                    type: 'line',
+                    showSymbol: false,
+                    data: [] // 初始为空，将从外部数据源填充
+                },
+                {
+                    name: 'Humidity (%)',
+                    type: 'line',
+                    showSymbol: false,
+                    data: [] // 初始为空，将从外部数据源填充
+                }
+            ]
+        };
+
+        // 使用 fetch API 获取数据
+        fetch('/data') // 假设 '/data' 是你的 API 端点
+            .then(response => response.json())
+            .then(data => {
+                // 提取时间和对应的温度和湿度值
+                var times = data.map(function(item) {
+                    return item.time;
+                });
+                var temperatures = data.map(function(item) {
+                    return item.temperature;
+                });
+                var humidities = data.map(function(item) {
+                    return item.humidity;
+                });
+
+                // 更新 ECharts 配置
+                option.xAxis.data = times;
+                option.series[0].data = temperatures;
+                option.series[1].data = humidities;
+
+                // 渲染图表
+                myChart.setOption(option);
+            })
+            .catch(error => {
+                console.error('Error fetching data: ', error);
+            });
+    </script>
+</body>
+
+</html>
